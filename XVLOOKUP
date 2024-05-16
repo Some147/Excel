@@ -1,23 +1,51 @@
-Function XVLOOKUP(LookupValue As Variant, LookupRange As Range, ColIndex As Integer, Optional ExactMatch As Boolean = True) As Variant
+Function XVLOOKUP(lookup_value As Variant, lookup_range As Range, return_range As Range, _
+                  Optional match_mode As Long = 0, Optional search_mode As Long = 1) As Variant
     Dim cell As Range
-    Dim Result As Variant
+    Dim found As Boolean
+    Dim i As Long
     
-    ' Убедитесь, что ColIndex не превышает количество столбцов в LookupRange
-    If ColIndex > LookupRange.Columns.Count Or ColIndex < 1 Then
+    ' Error handling
+    On Error GoTo ErrorHandler
+    
+    ' Ensure ranges have the same size
+    If lookup_range.Rows.Count <> return_range.Rows.Count Or _
+       lookup_range.Columns.Count <> return_range.Columns.Count Then
         XVLOOKUP = CVErr(xlErrValue)
         Exit Function
     End If
     
-    ' Инициализация переменной результата
-    Result = CVErr(xlErrNA)
+    found = False
     
-    ' Выполнение поиска
-    For Each cell In LookupRange.Columns(1).Cells
-        If (ExactMatch And cell.Value = LookupValue) Or (Not ExactMatch And InStr(1, cell.Value, LookupValue, vbTextCompare) > 0) Then
-            Result = cell.Offset(0, ColIndex - 1).Value
-            Exit For
-        End If
-    Next cell
+    ' Linear search
+    If search_mode = 1 Then
+        For i = 1 To lookup_range.Cells.Count
+            If (match_mode = 0 And lookup_range.Cells(i).Value = lookup_value) Or _
+               (match_mode = 1 And lookup_range.Cells(i).Value Like lookup_value) Then
+                XVLOOKUP = return_range.Cells(i).Value
+                found = True
+                Exit For
+            End If
+        Next i
+        
+    ' Reverse search
+    ElseIf search_mode = -1 Then
+        For i = lookup_range.Cells.Count To 1 Step -1
+            If (match_mode = 0 And lookup_range.Cells(i).Value = lookup_value) Or _
+               (match_mode = 1 And lookup_range.Cells(i).Value Like lookup_value) Then
+                XVLOOKUP = return_range.Cells(i).Value
+                found = True
+                Exit For
+            End If
+        Next i
+    End If
     
-    XVLOOKUP = Result
+    ' If no match is found
+    If Not found Then
+        XVLOOKUP = CVErr(xlErrNA)
+    End If
+    
+    Exit Function
+    
+ErrorHandler:
+    XVLOOKUP = CVErr(xlErrValue)
 End Function
