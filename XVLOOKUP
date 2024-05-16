@@ -1,1 +1,23 @@
-
+Function XVLOOKUP(LookupValue As Variant, LookupRange As Range, ColIndex As Integer, Optional ExactMatch As Boolean = True) As Variant
+    Dim cell As Range
+    Dim Result As Variant
+    
+    ' Убедитесь, что ColIndex не превышает количество столбцов в LookupRange
+    If ColIndex > LookupRange.Columns.Count Or ColIndex < 1 Then
+        XVLOOKUP = CVErr(xlErrValue)
+        Exit Function
+    End If
+    
+    ' Инициализация переменной результата
+    Result = CVErr(xlErrNA)
+    
+    ' Выполнение поиска
+    For Each cell In LookupRange.Columns(1).Cells
+        If (ExactMatch And cell.Value = LookupValue) Or (Not ExactMatch And InStr(1, cell.Value, LookupValue, vbTextCompare) > 0) Then
+            Result = cell.Offset(0, ColIndex - 1).Value
+            Exit For
+        End If
+    Next cell
+    
+    XVLOOKUP = Result
+End Function
