@@ -1,57 +1,29 @@
-Function XLOOKUP(lookup_value As Variant, lookup_range As Range, return_range As Range, _
-                  Optional match_mode As Long = 0, Optional search_mode As Long = 1) As Variant
-    Dim cell As Range
-    Dim found As Boolean
-    Dim i As Long
-    Dim lookup_values As Variant
-    Dim return_values As Variant
+Function MyCustomIFS(ParamArray args() As Variant) As Variant
+    Dim i As Integer
+    Dim numArgs As Integer
     Dim result As Variant
     
-    ' Error handling
-    On Error GoTo ErrorHandler
+    numArgs = UBound(args)
     
-    ' Ensure ranges have the same size
-    If lookup_range.Rows.Count <> return_range.Rows.Count Or _
-       lookup_range.Columns.Count <> return_range.Columns.Count Then
-        XVLOOKUP = CVErr(xlErrValue)
+    ' Check if number of arguments is odd (must have pairs of conditions and values)
+    If numArgs Mod 2 = 0 Then
+        MyCustomIFS = CVErr(xlErrValue)
         Exit Function
     End If
     
-    lookup_values = lookup_range.Value
-    return_values = return_range.Value
-    found = False
+    ' Loop through pairs of conditions and values
+    For i = 0 To numArgs Step 2
+        If args(i) Then
+            result = args(i + 1)
+            MyCustomIFS = result
+            Exit Function
+        End If
+    Next i
     
-    ' Linear search
-    If search_mode = 1 Then
-        For i = 1 To UBound(lookup_values, 1)
-            If (match_mode = 0 And lookup_values(i, 1) = lookup_value) Or _
-               (match_mode = 1 And lookup_values(i, 1) Like lookup_value) Then
-                result = return_values(i, 1)
-                found = True
-                Exit For
-            End If
-        Next i
-        
-    ' Reverse search
-    ElseIf search_mode = -1 Then
-        For i = UBound(lookup_values, 1) To 1 Step -1
-            If (match_mode = 0 And lookup_values(i, 1) = lookup_value) Or _
-               (match_mode = 1 And lookup_values(i, 1) Like lookup_value) Then
-                result = return_values(i, 1)
-                found = True
-                Exit For
-            End If
-        Next i
+    ' If no condition is met, return default value if provided
+    If numArgs Mod 2 = 1 Then
+        MyCustomIFS = args(numArgs)
+    Else
+        MyCustomIFS = CVErr(xlErrNA)
     End If
-    
-    ' If no match is found
-    If Not found Then
-        result = CVErr(xlErrNA)
-    End If
-    
-    XVLOOKUP = result
-    Exit Function
-    
-ErrorHandler:
-    XVLOOKUP = CVErr(xlErrValue)
 End Function
