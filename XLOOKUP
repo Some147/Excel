@@ -1,1 +1,29 @@
-
+Function MyCustomIFS(ParamArray args() As Variant) As Variant
+    Dim i As Integer
+    Dim numArgs As Integer
+    Dim result As Variant
+    
+    numArgs = UBound(args)
+    
+    ' Check if number of arguments is odd (must have pairs of conditions and values)
+    If numArgs Mod 2 = 0 Then
+        MyCustomIFS = CVErr(xlErrValue)
+        Exit Function
+    End If
+    
+    ' Loop through pairs of conditions and values
+    For i = 0 To numArgs Step 2
+        If args(i) Then
+            result = args(i + 1)
+            MyCustomIFS = result
+            Exit Function
+        End If
+    Next i
+    
+    ' If no condition is met, return default value if provided
+    If numArgs Mod 2 = 1 Then
+        MyCustomIFS = args(numArgs)
+    Else
+        MyCustomIFS = CVErr(xlErrNA)
+    End If
+End Function
