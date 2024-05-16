@@ -1,4 +1,4 @@
-Function XVLOOKUP(lookup_value As Variant, lookup_range As Range, return_range As Range, _
+Function XLOOKUP(lookup_value As Variant, lookup_range As Range, return_range As Range, _
                   Optional match_mode As Long = 0, Optional search_mode As Long = 1) As Variant
     Dim cell As Range
     Dim found As Boolean
